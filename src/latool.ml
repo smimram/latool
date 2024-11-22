@@ -19,23 +19,21 @@ let () =
     | Some fname -> open_out fname
     | None -> stdout
   in
+  let process =
+    let re_input = Str.regexp "\\\\input{\\([^}]*\\)}" in
+    fun fname ->
+      File.contents fname |>
+      Str.global_substitute re_input (fun s ->
+          let i = Str.matched_group 1 s in
+          let i = if not (Sys.file_exists i) then i ^ ".tex" else i in
+          if not (Sys.file_exists i) then
+            (
+              Printf.eprintf "Could not find file: %s\n%!" i;
+              "NOT_FOUND"
+            )
+          else
+            File.contents i
+        )
+  in
   if !expand then
-    let re = Str.regexp "\\\\input{\\([^}]*\\)}" in
-    List.iter
-      (fun fname ->
-         let s =
-           File.contents fname |>
-           Str.global_substitute re (fun s ->
-               let i = Str.matched_group 1 s in
-               let i = if not (Sys.file_exists i) then i ^ ".tex" else i in
-               if not (Sys.file_exists i) then
-                 (
-                   Printf.eprintf "Could not find file: %s\n%!" i;
-                   "NOT_FOUND"
-                 )
-               else
-                 File.contents i
-             )
-         in
-         output_string oc s
-      ) !fnames
+    List.iter (fun fname -> process fname |> output_string oc) !fnames

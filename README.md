@@ -1,3 +1,5 @@
-# flatex -- Flatten \input in LaTeX files.
+# LaTool
 
-This program replace `\input` commands in LaTeX files by their content. This is a rewriting of [flatex](https://www.ctan.org/pkg/flatex) in OCaml.
+A tool to preprocess LaTeX files. The following options are currently supported:
+
+- `--expand`: replace `\input` commands by their content

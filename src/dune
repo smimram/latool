@@ -1,4 +1,4 @@
 (executable
- (name latool)
+ (public_name latool)
  (libraries str)
 )

@@ -11,4 +11,4 @@ jobs:
     - name: Build
       run: dune build
     - name: Test
-      run: dune runtest
+      run: make test

@@ -7,7 +7,9 @@ let () =
   Arg.parse
     (Arg.align
        [
-         ("--expand", Arg.Set expand, " Replace \\input by their content.")
+         ("--expand", Arg.Set expand, " Replace \\input by their content.");
+         ("-o", Arg.String (fun s -> outfile := Some s), " Output file.");
+         ("--output", Arg.String (fun s -> outfile := Some s), " Output file.");
        ]
     )
     (fun s -> fnames := s :: !fnames)
@@ -18,16 +20,21 @@ let () =
     | None -> stdout
   in
   if !expand then
-    let re = Str.regexp "\\input{\\([^}]*\\)}" in
+    let re = Str.regexp "\\\\input{\\([^}]*\\)}" in
     List.iter
       (fun fname ->
          let s =
            File.contents fname |>
            Str.global_substitute re (fun s ->
-               assert (Str.string_match re s 0);
                let i = Str.matched_group 1 s in
-               Printf.printf "Replace %s\n%!" i;
-               "REPLACED"
+               let i = if not (Sys.file_exists i) then i ^ ".tex" else i in
+               if not (Sys.file_exists i) then
+                 (
+                   Printf.eprintf "Could not find file: %s\n%!" i;
+                   "NOT_FOUND"
+                 )
+               else
+                 File.contents i
              )
          in
          output_string oc s

@@ -22,13 +22,13 @@ let () =
     | None -> stdout
   in
   let rec process =
-    let re_comment = Str.regexp "%[^\n]\n" in
+    let re_comment = Str.regexp "%[^\n]*$" in
     let re_input = Str.regexp "\\\\input{\\([^}]*\\)}" in
     fun fname ->
       let s = File.contents fname in
       let s =
         if not !remove_comments then s
-        else Str.global_replace re_comment "\n" s
+        else Str.global_replace re_comment "" s
       in
       let s =
         if not !expand then s else

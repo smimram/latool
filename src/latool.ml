@@ -54,6 +54,9 @@ let () =
       let s = Str.global_replace (Str.regexp "~") " " s in
       let s = Str.global_replace (Str.regexp "\\\\cite{[^}]*}") "" s in
       let s = Str.global_replace (Str.regexp " ,") "," s in
+      let s = Str.global_replace (Str.regexp "\\\\documentclass{[^}]*}") "" s in
+      let s = Str.global_replace (Str.regexp "\\\\usepackage{[^}]*}") "" s in
+      let s = Str.global_replace (Str.regexp "\\\\newcommand{[^}]*}") "" s in
       let s = Str.global_substitute (Str.regexp "\\\\section{\\([^}]*\\)}") (fun s -> Str.matched_group 1 s ^ "\n") s in
       let s = Str.global_substitute (Str.regexp "\\\\subsection{\\([^}]*\\)}") (fun s -> Str.matched_group 1 s ^ "\n") s in
       Grammar.check s

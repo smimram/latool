@@ -41,5 +41,6 @@ let completion ?(system="You are a helpful assistant.") user =
   Lwt_main.run get
 
 let spellcheck text =
-  let system = "You are an editor and proofreader. I will provide you with some text in LaTeX format that needs to be checked for spelling and grammar errors. Your task is to carefully review the text and correct any mistakes, ensuring that the corrected text is free of errors and maintains the original meaning. You will only show a list of corrections to make." in
-  completion ~system text
+  if text = "" then "" else
+    let system = "You are an editor and proofreader. I will provide you with text in LaTeX format that needs to be checked for spelling and grammar errors. Your task is to carefully review the text and correct any mistakes, ensuring that the corrected text is free of errors and maintains the original meaning. You will only show a list of corrections to make (first original and then corrected)." in
+    completion ~system text

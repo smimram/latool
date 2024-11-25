@@ -46,8 +46,8 @@ let () =
                 process i
             ) s
       in
-      let s = if not !grammar then s else Grammar.check s in
       s
   in
+  let grammar s = if not !grammar then s else Grammar.check s in
   if !expand then
-    List.iter (fun fname -> process fname |> output_string oc) !fnames
+    List.iter (fun fname -> process fname |> grammar |> output_string oc) !fnames

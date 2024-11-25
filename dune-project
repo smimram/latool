@@ -10,4 +10,7 @@
  (name latool)
  (description "Preprocess LaTeX files.")
  (synopsis "Tool to perform various preprocessing on LaTeX files (removing comments, expanding input files, etc.)")
+ (depends
+   yojson
+ )
 )

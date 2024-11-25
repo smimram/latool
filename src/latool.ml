@@ -4,11 +4,13 @@ let () =
   let outfile = ref None in
   let fnames = ref [] in
   let expand = ref false in
+  let grammar = ref false in
   let remove_comments = ref false in
   Arg.parse
     (Arg.align
        [
          ("--expand", Arg.Set expand, " Replace \\input by their content.");
+         ("--grammar", Arg.Set grammar, " Perform grammar check using LLM.");
          ("-o", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--output", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--remove-comments", Arg.Set remove_comments, " Remove comments.");
@@ -44,6 +46,7 @@ let () =
                 process i
             ) s
       in
+      let s = if not !grammar then s else Grammar.check s in
       s
   in
   if !expand then

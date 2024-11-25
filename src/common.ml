@@ -5,3 +5,19 @@ module File = struct
     close_in ic;
     s
 end
+
+module JSON = struct
+  let to_assoc = function
+    | `Assoc l -> l
+    | _ -> assert false
+
+  let assoc k json = List.assoc k (to_assoc json)
+
+  let to_list = function
+    | `List l -> l
+    | _ -> assert false
+
+  let to_string = function
+    | `String s -> s
+    | _ -> assert false
+end

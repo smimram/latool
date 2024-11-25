@@ -10,6 +10,7 @@ homepage: "https://github.com/smimram/latool"
 bug-reports: "https://github.com/smimram/latool/issues"
 depends: [
   "dune" {>= "2.9"}
+  "yojson"
   "odoc" {with-doc}
 ]
 build: [

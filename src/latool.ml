@@ -10,7 +10,7 @@ let () =
     (Arg.align
        [
          ("--expand", Arg.Set expand, " Replace \\input by their content.");
-         ("--grammar", Arg.Set grammar, " Perform grammar check using LLM.");
+         ("--grammar", Arg.Unit (fun () -> grammar := true; remove_comments := true), " Perform grammar check using LLM.");
          ("-o", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--output", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--remove-comments", Arg.Set remove_comments, " Remove comments.");
@@ -18,6 +18,7 @@ let () =
     )
     (fun s -> fnames := s :: !fnames)
     "latool [options] files";
+  if !fnames = [] then (print_endline "Please provide a file name."; exit 1);
   let oc =
     match !outfile with
     | Some fname -> open_out fname

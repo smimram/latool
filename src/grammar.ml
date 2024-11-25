@@ -1,6 +1,5 @@
 (** Check the contents of a LaTeX file and return corrections in markdown format. *)
-let check ?(stdout=true) ?(limit=2000) s =
-  (* Printf.printf "checking: '%s'\n" s; *)
+let check ?(stdout=true) ?(limit=20) s =
   let l = String.split_on_char '\n' s |> ref in
   let ans = ref "" in
   let buf = ref "" in

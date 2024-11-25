@@ -49,6 +49,14 @@ let () =
       in
       s
   in
-  let grammar s = if not !grammar then s else Grammar.check s in
+  let grammar s =
+    if not !grammar then s else
+      let s = Str.global_replace (Str.regexp "~") " " s in
+      let s = Str.global_replace (Str.regexp "\\\\cite{[^}]*}") "" s in
+      let s = Str.global_replace (Str.regexp " ,") "," s in
+      let s = Str.global_substitute (Str.regexp "\\\\section{\\([^}]*\\)}") (fun s -> Str.matched_group 1 s ^ "\n") s in
+      let s = Str.global_substitute (Str.regexp "\\\\subsection{\\([^}]*\\)}") (fun s -> Str.matched_group 1 s ^ "\n") s in
+      Grammar.check s
+  in
   if !expand then
     List.iter (fun fname -> process fname |> grammar |> output_string oc) !fnames

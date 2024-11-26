@@ -72,11 +72,12 @@ let () =
         |> remove {|\\maketitle|}
         |> remove {|\\tableofcontents|}
         |> remove' {|\\\[.*\\]|}
-        |> remove' {|\\begin\{align\*}.*\\end\{align\*}|}
+        |> remove' {|\\begin\{align(\*)?}.*\\end\{align(\*)?}|}
+        |> remove' {|\\begin\{equation(\*)?}.*\\end\{equation(\*)?}|}
         |> Re.replace (Re.Posix.re {|\\section\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "# " ^ Re.Group.get g 1 ^ "\n")
         |> Re.replace (Re.Posix.re {|\\subsection\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "## " ^ Re.Group.get g 1 ^ "\n")
         |> Re.replace (Re.Posix.re {|\\subsubsection\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "### " ^ Re.Group.get g 1 ^ "\n")
-        |> remove {|\\begin\{[^}]*}|}
+        |> remove {|\\begin\{[^}]*}(\[[^]]*])?|}
         |> remove {|\\end\{[^}]*}|}
         |> replace {|\\item(\[[^]]*])?|} "-"
         |> remove {|\\q?quad|}

@@ -65,7 +65,7 @@ let () =
       let s = Str.global_substitute (Str.regexp {|\\subsection{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
       (* let s = Str.global_replace (Str.regexp {|\\\[.*\\\]|}) "" s in *)
       let s = Str.global_replace (Str.regexp "\\\\\\[\\(.\\|\n\\)*\\\\\\]") "" s in
-      let s = Str.global_replace (Str.regexp "\\\\begin{align*}\\(.\\|\n\\)*\\\\end{align*}") "" s in
+      let s = Str.global_replace (Str.regexp "\\\\begin{align\\*}\\(.\\|\n\\)*\\\\end{align\\*}") "" s in
       let s = Str.global_replace (Str.regexp {|\\begin{[^}]*}|}) "" s in
       let s = Str.global_replace (Str.regexp {|\\end{[^}]*}|}) "" s in
       Grammar.check s

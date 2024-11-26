@@ -1,7 +1,7 @@
 open Common
 
 (** Check the contents of a LaTeX file and return corrections in markdown format. *)
-let check ?(stdout=true) ?(limit=20) s =
+let check ?(stdout=true) ?(limit=1000) s =
   let l = String.split_on_char '\n' s |> ref in
   let t0 = Unix.time () in
   let lines = List.length !l in

@@ -63,6 +63,8 @@ let () =
         let s = Str.global_replace (Str.regexp {|\\\(re\)?newcommand.*$|}) "" s in
         let s = Str.global_substitute (Str.regexp {|\\title{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
         let s = Str.global_replace (Str.regexp {|\\author{[^}]*}|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\address{[^}]*}|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\email{[^}]*}|}) "" s in
         let s = Str.global_replace (Str.regexp {|\\maketitle|}) "" s in
         let s = Str.global_replace (Str.regexp {|\\tableofcontents|}) "" s in
         let s = Str.global_substitute (Str.regexp {|\\section{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
@@ -72,6 +74,7 @@ let () =
         let s = Str.global_replace (Str.regexp "\\\\begin{align\\*}\\(.\\|\n\\)*\\\\end{align\\*}") "" s in
         let s = Str.global_replace (Str.regexp {|\\begin{[^}]*}|}) "" s in
         let s = Str.global_replace (Str.regexp {|\\end{[^}]*}|}) "" s in
+        let s = Str.global_substitute (Str.regexp {|\\emph{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s) s in
         let s = Str.global_replace (Str.regexp {|\\bibliography.*$|}) "" s in
         let s = Str.global_replace (Str.regexp {|\\noindent|}) "" s in
         s

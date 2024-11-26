@@ -21,3 +21,9 @@ module JSON = struct
     | `String s -> s
     | _ -> assert false
 end
+
+module Re = struct
+  include Re
+
+  let remove re s = replace re ~f:(fun _ -> "") s
+end

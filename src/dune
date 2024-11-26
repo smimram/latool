@@ -1,4 +1,4 @@
 (executable
  (public_name latool)
- (libraries str cohttp cohttp-lwt-unix yojson)
+ (libraries re cohttp cohttp-lwt-unix yojson)
 )

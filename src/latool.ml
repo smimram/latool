@@ -27,18 +27,18 @@ let () =
     | None -> stdout
   in
   let rec process =
-    let re_comment = Str.regexp "%[^\n]*$" in
-    let re_input = Str.regexp "\\\\input{\\([^}]*\\)}" in
+    let re_comment = Re.Posix.re ~opts:[`Newline] {|%.*$|} |> Re.compile in
+    let re_input = Re.Posix.re {|\\input\{([^}]*)}|} |> Re.compile in
     fun fname ->
       let s = File.contents fname in
       let s =
         if not !remove_comments then s
-        else Str.global_replace re_comment "" s
+        else Re.remove re_comment s
       in
       let s =
         if not !expand then s else
-          Str.global_substitute re_input (fun s ->
-              let i = Str.matched_group 1 s in
+          Re.replace re_input ~f:(fun g ->
+              let i = Re.Group.get g 1 in
               let i = if not (Sys.file_exists i) then i ^ ".tex" else i in
               if not (Sys.file_exists i) then
                 (
@@ -54,30 +54,39 @@ let () =
   let postprocess s =
     let s =
       if not !remove_markup then s else
-        let s = Str.global_replace (Str.regexp "~") " " s in
-        let s = Str.global_replace (Str.regexp {|\\cite{[^}]*}|}) "" s in
-        let s = Str.global_replace (Str.regexp " ,") "," s in
-        let s = Str.global_replace (Str.regexp {|\\documentclass.*$|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\usepackage.*$|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\usetikzlibrary.*$|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\\(re\)?newcommand.*$|}) "" s in
-        let s = Str.global_substitute (Str.regexp {|\\title{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
-        let s = Str.global_replace (Str.regexp {|\\author{[^}]*}|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\address{[^}]*}|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\email{[^}]*}|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\maketitle|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\tableofcontents|}) "" s in
-        let s = Str.global_substitute (Str.regexp {|\\section{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
-        let s = Str.global_substitute (Str.regexp {|\\subsection{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
-        (* let s = Str.global_replace (Str.regexp {|\\\[.*\\\]|}) "" s in *)
-        let s = Str.global_replace (Str.regexp "\\\\\\[\\(.\\|\n\\)*\\\\\\]") "" s in
-        let s = Str.global_replace (Str.regexp "\\\\begin{align\\*}\\(.\\|\n\\)*\\\\end{align\\*}") "" s in
-        let s = Str.global_replace (Str.regexp {|\\begin{[^}]*}|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\end{[^}]*}|}) "" s in
-        let s = Str.global_substitute (Str.regexp {|\\emph{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s) s in
-        let s = Str.global_replace (Str.regexp {|\\bibliography.*$|}) "" s in
-        let s = Str.global_replace (Str.regexp {|\\noindent|}) "" s in
+        let remove re = Re.remove (Re.Posix.re ~opts:[`Newline] re |> Re.compile) in
+        let remove' re = Re.remove (Re.Posix.re re |> Re.shortest |> Re.compile) in
+        let replace1 re = Re.replace (Re.Posix.re ~opts:[`Newline] re |> Re.compile) ~f:(fun g -> Re.Group.get g 1) in
         s
+        |> remove {|\\documentclass.*$|}
+        |> remove {|\\usepackage.*$|}
+        |> remove {|\\usetikzlibrary.*$|}
+        |> remove {|\\(re)?newcommand.*$|}
+        |> replace1 {|\\title\{([^}]*)}|}
+        |> remove {|\\author\{([^}]*)}|}
+        |> remove {|\\address\{([^}]*)}|}
+        |> remove {|\\email\{([^}]*)}|}
+        |> remove {|\\maketitle|}
+        |> remove {|\\tableofcontents|}
+        |> remove' {|\\\[.*\\]|}
+        |> remove' {|\\begin\{align\*}.*\\end\{align\*}|}
+        |> replace1 {|\\section\{([^}]*)}|}
+        |> replace1 {|\\subsection\{([^}]*)}|}
+        |> remove {|\\begin\{[^}]*}|}
+        |> remove {|\\end\{[^}]*}|}
+        |> remove {|\\item|}
+        |> remove {|\\q?quad|}
+        |> remove {|\\label\{[^}]*}|}
+        |> remove {|\\cite(\[[^]]*])?\{[^}]*}|}
+        |> replace1 {|\\emph\{([^}]*)}|}
+        |> remove {|\\noindent$|}
+        |> remove {|\\bibliography.*$|}
+        |> remove {|\\\\|}
+        |> Re.replace (Re.str "~" |> Re.compile) ~f:(fun _ -> " ")
+        |> Re.replace (Re.str "[ ]+" |> Re.compile) ~f:(fun _ -> " ")
+        |> Re.replace (Re.str " ," |> Re.compile) ~f:(fun _ -> ",")
+        |> Re.replace (Re.str {| +\.|} |> Re.compile) ~f:(fun _ -> ".")
+        |> remove {|^ *|}
     in
     let s = if not !grammar then s else Grammar.check s in
     s

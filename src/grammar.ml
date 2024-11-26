@@ -1,6 +1,7 @@
 (** Check the contents of a LaTeX file and return corrections in markdown format. *)
 let check ?(stdout=true) ?(limit=20) s =
   let l = String.split_on_char '\n' s |> ref in
+  let lines = List.length !l in
   let ans = ref "" in
   let buf = ref "" in
   while !l <> [] do
@@ -13,6 +14,7 @@ let check ?(stdout=true) ?(limit=20) s =
     let buf = !buf in
     let buf = Printf.sprintf "```\n%s\n```\n" buf in
     if stdout then print_endline buf;
+    Printf.printf "%d%%\r" (List.length !l * 100 / lines);
     let corrections = Llama.spellcheck buf in
     if stdout then Printf.printf "%s\n\n%!" corrections;
     let chunk = Printf.sprintf "%s\n%s\n\n" buf corrections in

@@ -32,8 +32,8 @@ let () =
     fun fname ->
       let s = File.contents fname in
       let s =
-        if not !remove_comments then s
-        else Re.remove re_comment s
+        if not !remove_comments then s else
+          Re.remove re_comment s
       in
       let s =
         if not !expand then s else
@@ -56,6 +56,7 @@ let () =
       if not !remove_markup then s else
         let remove re = Re.remove (Re.Posix.re ~opts:[`Newline] re |> Re.compile) in
         let remove' re = Re.remove (Re.Posix.re re |> Re.shortest |> Re.compile) in
+        let replace re r = Re.replace (Re.Posix.re ~opts:[`Newline] re |> Re.compile) ~f:(fun _ -> r) in
         let replace1 re = Re.replace (Re.Posix.re ~opts:[`Newline] re |> Re.compile) ~f:(fun g -> Re.Group.get g 1) in
         s
         |> remove {|\\documentclass.*$|}
@@ -64,17 +65,19 @@ let () =
         |> remove {|\\(re)?newcommand.*$|}
         |> replace1 {|\\title\{([^}]*)}|}
         |> remove {|\\author\{([^}]*)}|}
+        |> Re.replace (Re.Posix.re {|\\keywords\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "Keywords: " ^ Re.Group.get g 1)
         |> remove {|\\address\{([^}]*)}|}
         |> remove {|\\email\{([^}]*)}|}
         |> remove {|\\maketitle|}
         |> remove {|\\tableofcontents|}
         |> remove' {|\\\[.*\\]|}
         |> remove' {|\\begin\{align\*}.*\\end\{align\*}|}
-        |> replace1 {|\\section\{([^}]*)}|}
-        |> replace1 {|\\subsection\{([^}]*)}|}
+        |> Re.replace (Re.Posix.re {|\\section\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "# " ^ Re.Group.get g 1 ^ "\n")
+        |> Re.replace (Re.Posix.re {|\\subsection\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "## " ^ Re.Group.get g 1 ^ "\n")
+        |> Re.replace (Re.Posix.re {|\\subsubsection\{([^}]*)}|} |> Re.compile) ~f:(fun g -> "### " ^ Re.Group.get g 1 ^ "\n")
         |> remove {|\\begin\{[^}]*}|}
         |> remove {|\\end\{[^}]*}|}
-        |> remove {|\\item|}
+        |> replace {|\\item(\[[^]]*])?|} "-"
         |> remove {|\\q?quad|}
         |> remove {|\\label\{[^}]*}|}
         |> remove {|\\cite(\[[^]]*])?\{[^}]*}|}
@@ -82,7 +85,7 @@ let () =
         |> remove {|\\noindent$|}
         |> remove {|\\bibliography.*$|}
         |> remove {|\\\\|}
-        |> Re.replace (Re.str "~" |> Re.compile) ~f:(fun _ -> " ")
+        |> replace "~" " "
         |> Re.replace (Re.str "[ ]+" |> Re.compile) ~f:(fun _ -> " ")
         |> Re.replace (Re.str " ," |> Re.compile) ~f:(fun _ -> ",")
         |> Re.replace (Re.str {| +\.|} |> Re.compile) ~f:(fun _ -> ".")
@@ -92,5 +95,4 @@ let () =
     let s = if not !grammar then s else Grammar.check s in
     s
   in
-  if !expand then
-    List.iter (fun fname -> process fname |> postprocess |> output_string oc) !fnames
+  List.iter (fun fname -> process fname |> postprocess |> output_string oc) !fnames

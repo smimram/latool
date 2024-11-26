@@ -14,7 +14,7 @@ let check ?(stdout=true) ?(limit=20) s =
     let buf = !buf in
     let buf = Printf.sprintf "```\n%s\n```\n" buf in
     if stdout then print_endline buf;
-    Printf.printf "%d%%\r" (List.length !l * 100 / lines);
+    Printf.printf "progress: %d%%\r%!" (100 - List.length !l * 100 / lines);
     let corrections = Llama.spellcheck buf in
     if stdout then Printf.printf "%s\n\n%!" corrections;
     let chunk = Printf.sprintf "%s\n%s\n\n" buf corrections in

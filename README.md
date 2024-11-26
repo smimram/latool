@@ -18,4 +18,4 @@ The `--grammar` flag splits the text and feeds it to a large language model. In 
 llama-server -m your_model.gguf
 ```
 
-Note that, in this way, your file is never disclosed to distant servers. The output should be a (roughly valid) markdown file containing the text as well as suggested changes. In order to speed up the process, some LaTeX markup is removed from the input.
+In practice, [Llama 3.2 3B Instruct](https://huggingface.co/meta-llama/Llama-3.2-3B) performs reasonably fast and well (download the corresponding GGUF file [here](https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF)). Note that, in this way, your file is never disclosed to distant servers. The output should be a (roughly valid) markdown file containing the text as well as suggested changes. In order to speed up the process, some LaTeX markup is removed from the input.

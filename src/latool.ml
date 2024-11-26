@@ -87,6 +87,7 @@ let () =
         |> Re.replace (Re.str " ," |> Re.compile) ~f:(fun _ -> ",")
         |> Re.replace (Re.str {| +\.|} |> Re.compile) ~f:(fun _ -> ".")
         |> remove {|^ *|}
+        |> Re.replace (Re.Posix.re "\n\n+" |> Re.compile) ~f:(fun _ -> "\n\n")
     in
     let s = if not !grammar then s else Grammar.check s in
     s

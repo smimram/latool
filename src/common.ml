@@ -1,3 +1,7 @@
+module Settings = struct
+  let show_progress = ref true
+end
+
 module File = struct
   let contents fname =
     let ic = open_in fname in

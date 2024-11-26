@@ -12,6 +12,7 @@ let () =
        [
          ("--expand", Arg.Set expand, " Replace \\input by their content.");
          ("--grammar", Arg.Unit (fun () -> grammar := true; expand := true; remove_comments := true; remove_markup := true), " Perform grammar check using LLM.");
+         ("--no-progress", Arg.Unit (fun () -> Settings.show_progress := false), " Do not show progress for long operations.");
          ("-o", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--output", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--remove-comments", Arg.Set remove_comments, " Remove comments.");

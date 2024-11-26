@@ -26,7 +26,7 @@ let completion ?(system="You are a helpful assistant.") user =
     let q = Yojson.to_string q in
     Client.post ~body:(`String q) uri >>= fun (resp, body) ->
     let code = resp |> Response.status |> Code.code_of_status in
-    assert (code = 200);
+    if code <> 200 then failwith "Unexpected llama.cpp code: %d" code;
     body |> Cohttp_lwt.Body.to_string >|= fun body ->
     (* body |> Yojson.Basic.from_string |> Yojson.Basic.pretty_to_string *)
     body

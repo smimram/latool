@@ -18,4 +18,4 @@ The `--grammar` flag splits the text and feeds it to a large language model. In 
 llama-server -m your_model.gguf
 ```
 
-The output should be a (roughly valid) markdown file containing the text as well as suggested changes. In order to speed up the process, some LaTeX markup is removed from the input.
+Note that, in this way, your file is never disclosed to distant servers. The output should be a (roughly valid) markdown file containing the text as well as suggested changes. In order to speed up the process, some LaTeX markup is removed from the input.

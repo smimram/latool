@@ -6,14 +6,16 @@ let () =
   let expand = ref false in
   let grammar = ref false in
   let remove_comments = ref false in
+  let remove_markup = ref false in
   Arg.parse
     (Arg.align
        [
          ("--expand", Arg.Set expand, " Replace \\input by their content.");
-         ("--grammar", Arg.Unit (fun () -> grammar := true; expand := true; remove_comments := true), " Perform grammar check using LLM.");
+         ("--grammar", Arg.Unit (fun () -> grammar := true; expand := true; remove_comments := true; remove_markup := true), " Perform grammar check using LLM.");
          ("-o", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--output", Arg.String (fun s -> outfile := Some s), " Output file.");
          ("--remove-comments", Arg.Set remove_comments, " Remove comments.");
+         ("--remove-markup", Arg.Set remove_markup, " Remove markup (roughly).");
        ]
     )
     (fun s -> fnames := s :: !fnames)
@@ -49,26 +51,33 @@ let () =
       in
       s
   in
-  let grammar s =
-    if not !grammar then s else
-      let s = Str.global_replace (Str.regexp "~") " " s in
-      let s = Str.global_replace (Str.regexp {|\\cite{[^}]*}|}) "" s in
-      let s = Str.global_replace (Str.regexp " ,") "," s in
-      let s = Str.global_replace (Str.regexp {|\\documentclass.*$|}) "" s in
-      let s = Str.global_replace (Str.regexp {|\\usepackage.*$|}) "" s in
-      let s = Str.global_replace (Str.regexp {|\\usetikzlibrary.*$|}) "" s in
-      let s = Str.global_replace (Str.regexp {|\\\(re\)?newcommand.*$|}) "" s in
-      let s = Str.global_substitute (Str.regexp {|\\title{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
-      let s = Str.global_replace (Str.regexp {|\\author{[^}]*}|}) "" s in
-      let s = Str.global_replace (Str.regexp {|\\tableofcontents|}) "" s in
-      let s = Str.global_substitute (Str.regexp {|\\section{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
-      let s = Str.global_substitute (Str.regexp {|\\subsection{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
-      (* let s = Str.global_replace (Str.regexp {|\\\[.*\\\]|}) "" s in *)
-      let s = Str.global_replace (Str.regexp "\\\\\\[\\(.\\|\n\\)*\\\\\\]") "" s in
-      let s = Str.global_replace (Str.regexp "\\\\begin{align\\*}\\(.\\|\n\\)*\\\\end{align\\*}") "" s in
-      let s = Str.global_replace (Str.regexp {|\\begin{[^}]*}|}) "" s in
-      let s = Str.global_replace (Str.regexp {|\\end{[^}]*}|}) "" s in
-      Grammar.check s
+  let postprocess s =
+    let s =
+      if not !remove_markup then s else
+        let s = Str.global_replace (Str.regexp "~") " " s in
+        let s = Str.global_replace (Str.regexp {|\\cite{[^}]*}|}) "" s in
+        let s = Str.global_replace (Str.regexp " ,") "," s in
+        let s = Str.global_replace (Str.regexp {|\\documentclass.*$|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\usepackage.*$|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\usetikzlibrary.*$|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\\(re\)?newcommand.*$|}) "" s in
+        let s = Str.global_substitute (Str.regexp {|\\title{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
+        let s = Str.global_replace (Str.regexp {|\\author{[^}]*}|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\maketitle|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\tableofcontents|}) "" s in
+        let s = Str.global_substitute (Str.regexp {|\\section{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
+        let s = Str.global_substitute (Str.regexp {|\\subsection{\([^}]*\)}|}) (fun s -> Str.matched_group 1 s ^ "\n") s in
+        (* let s = Str.global_replace (Str.regexp {|\\\[.*\\\]|}) "" s in *)
+        let s = Str.global_replace (Str.regexp "\\\\\\[\\(.\\|\n\\)*\\\\\\]") "" s in
+        let s = Str.global_replace (Str.regexp "\\\\begin{align\\*}\\(.\\|\n\\)*\\\\end{align\\*}") "" s in
+        let s = Str.global_replace (Str.regexp {|\\begin{[^}]*}|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\end{[^}]*}|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\bibliography.*$|}) "" s in
+        let s = Str.global_replace (Str.regexp {|\\noindent|}) "" s in
+        s
+    in
+    let s = if not !grammar then s else Grammar.check s in
+    s
   in
   if !expand then
-    List.iter (fun fname -> process fname |> grammar |> output_string oc) !fnames
+    List.iter (fun fname -> process fname |> postprocess |> output_string oc) !fnames

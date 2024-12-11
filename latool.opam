@@ -11,6 +11,7 @@ homepage: "https://github.com/smimram/latool"
 bug-reports: "https://github.com/smimram/latool/issues"
 depends: [
   "dune" {>= "2.9"}
+  "cohttp-lwt-unix"
   "re"
   "yojson"
   "odoc" {with-doc}

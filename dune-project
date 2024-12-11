@@ -1,5 +1,6 @@
 (lang dune 2.9)
 (name latool)
+(version 0.1.0)
 (source (github smimram/latool))
 (license  GPL-3.0-or-later)
 (authors "Samuel Mimram <smimram@gmail.com>")
